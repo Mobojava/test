@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Access</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        video {
+            border: 2px solid #333;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 640px;
+            display: none;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-top: 10px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <video id="camera" autoplay playsinline></video>
+    <div id="error" class="error-message" style="display: none;">
+        Cannot access your camera. Please check your permissions.
+    </div>
+    <button id="retry" style="display: none;">Retry Camera Access</button>
+
+    <script>
+        const videoElement = document.getElementById('camera');
+        const errorElement = document.getElementById('error');
+        const retryButton = document.getElementById('retry');
+
+        async function startCamera() {
+            try {
+                // درخواست دسترسی به دوربین
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+                videoElement.style.display = "block"; // نمایش ویدیو
+                errorElement.style.display = "none"; // مخفی کردن خطا
+                retryButton.style.display = "none"; // مخفی کردن دکمه
+            } catch (error) {
+                console.error("Error accessing camera: ", error);
+
+                // بررسی نوع خطا و نمایش پیام
+                if (error.name === "NotAllowedError") {
+                    errorElement.innerText = "Camera access is blocked. Please allow camera permissions in your browser or system settings.";
+                } else if (error.name === "NotFoundError") {
+                    errorElement.innerText = "No camera found. Please connect a camera device.";
+                } else {
+                    errorElement.innerText = "Cannot access your camera. Please check your permissions.";
+                }
+
+                errorElement.style.display = "block";
+                retryButton.style.display = "inline-block"; // نمایش دکمه تلاش مجدد
+            }
+        }
+
+        // افزودن رویداد برای تلاش مجدد
+        retryButton.addEventListener('click', startCamera);
+
+        // شروع دوربین هنگام بارگذاری صفحه
+        startCamera();
+    </script>
+</body>
+
+</html>
